@@ -100,14 +100,8 @@ My final model results were:
 * training set accuracy of 0.998
 * validation set accuracy of 0.961
 * test set accuracy of 0.943
-If an iterative approach was chosen:
-* What was the first architecture that was tried and why was it chosen?
-* What were some problems with the initial architecture?
-* How was the architecture adjusted and why was it adjusted? Typical adjustments could include choosing a different model architecture, adding or taking away layers (pooling, dropout, convolution, etc), using an activation function or changing the activation function. One common justification for adjusting an architecture would be due to overfitting or underfitting. A high accuracy on the training set but low accuracy on the validation set indicates over fitting; a low accuracy on both sets indicates under fitting.
-* Which parameters were tuned? How were they adjusted and why?
-* What are some of the important design choices and why were they chosen? For example, why might a convolution layer work well with this problem? How might a dropout layer help with creating a successful model?
 
-I improved the solution by an iterative approach.
+**I improved the solution by an iterative approach.**
 
 In the beginning, I started with the LeNet architecture for the following reasons:
 * It was designed for classifying images.
@@ -116,6 +110,7 @@ In the beginning, I started with the LeNet architecture for the following reason
 
 However, the original LeNet was to deal with grayscale images with size 32x32x1 and only 10 classes, whereas we have RGB images with size 32x32x3 and 43 classes. So I modified the LeNet so that it can be applied to our case: I changed the input of LeNet from 32x32 to 32x32x3, and changed the final output size from 10 to 43.
 So the first architecture I tried was:
+
 | Layer         		|     Description	        					| 
 |:---------------------:|:---------------------------------------------:| 
 | Input         		| 32x32x3 RGB image   							| 
@@ -135,10 +130,12 @@ So the first architecture I tried was:
 With this architecture, I was able to achieve:
 * training set accuracy of 0.993
 * validation set accuracy of 0.902
+
 This was not good. So I didn't test it with test set.
 
 I thought the output sizes of fully connected layers might be a little too small for a final output size of 43, because 43 is much bigger than 10. I'd like to try increasing the output sizes of fully connected layers so that it contains sufficient information to classify 43 types.
 Thus I make the following changes (highlighted with **bold**):
+
 | Layer         		|     Description	        					| 
 |:---------------------:|:---------------------------------------------:| 
 | Input         		| 32x32x3 RGB image   							| 
@@ -158,6 +155,7 @@ Thus I make the following changes (highlighted with **bold**):
 And with this bigger network I was able to achieve:
 * training set accuracy of 0.996
 * validation set accuracy of 0.932
+
 The performance was improved! But it was barely over 0.93 on the validation set accuracy. With test set? I didn't try, because I reckoned that it might not look good.
 
 Then a method came to my mind: **Dropout**.
@@ -185,7 +183,9 @@ Now the architecture becomes this:
 With this new architecture, I was able to achieve:
 * training set accuracy of 0.998
 * validation set accuracy of 0.961
-The validation set accuracy is much higher than 0.93! Now I can try the test set. The test set accuracy turned out to be 0.943, higher than 0.93.
+
+The validation set accuracy is much higher than 0.93! Now I can try the test set.
+The test set accuracy turned out to be 0.943, higher than 0.93.
 
 ### Test a Model on New Images
 
