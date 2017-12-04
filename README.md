@@ -62,27 +62,35 @@ X_test = (X_test-128.)/128.
 
 #### 2. Describe what your final model architecture looks like including model type, layers, layer sizes, connectivity, etc.) Consider including a diagram and/or table describing the final model.
 
-My final model consisted of the following layers:
+My final model is based on LeNet architecture, with a few modifications including change of fully connected layer output size and dropout. The final model can be summarized with the following table:
 
 | Layer         		|     Description	        					| 
 |:---------------------:|:---------------------------------------------:| 
 | Input         		| 32x32x3 RGB image   							| 
-| Convolution 3x3     	| 1x1 stride, same padding, outputs 32x32x64 	|
-| RELU					|												|
-| Max pooling	      	| 2x2 stride,  outputs 16x16x64 				|
-| Convolution 3x3	    | etc.      									|
-| Fully connected		| etc.        									|
-| Softmax				| etc.        									|
-|						|												|
-|						|												|
+| Layer 1: Convolution 5x5     	| 1x1 stride, valid padding, outputs 28x28x6 	|
+| RELU					|					outputs 28x28x6				|
+| Max pooling	      	| 2x2 stride, valid padding, outputs 14x14x6 	|
+| Layer 2: Convolution 5x5	    | 1x1 stride, valid padding, outputs 10x10x16		|
+| RELU		| outputs 10x10x16			|
+| Max pooling	      	| 2x2 stride, valid padding, outputs 5x5x16 	|
+| Flatten	      	| input 5x5x16, output 5x5x16=400 	|
+| Layer 3: Fully Connected   | input 400, output 300		|
+| RELU					|					outputs 300			|
+| Dropout				|		Only applied for training,	outputs 300			|
+| Layer 4: Fully Connected   | input 300, output 172		|
+| RELU					|					outputs 172			|
+| Dropout				|		Only applied for training, outputs 172			|
+| Layer 5: Fully Connected   | input 172, Output size is n_classes=43		|
  
 
 
-####3. Describe how you trained your model. The discussion can include the type of optimizer, the batch size, number of epochs and any hyperparameters such as learning rate.
+#### 3. Describe how you trained your model. The discussion can include the type of optimizer, the batch size, number of epochs and any hyperparameters such as learning rate.
 
-To train the model, I used an ....
+To train the model, I used 20 EPOCHS. Initially I used 10, but later on I figured 20 would train the model better.
 
-####4. Describe the approach taken for finding a solution and getting the validation set accuracy to be at least 0.93. Include in the discussion the results on the training, validation and test sets and where in the code these were calculated. Your approach may have been an iterative process, in which case, outline the steps you took to get to the final solution and why you chose those steps. Perhaps your solution involved an already well known implementation or architecture. In this case, discuss why you think the architecture is suitable for the current problem.
+The batch size I used is 128, which follows the LeNet original setting. Same for the training rate, I kepted it as 0.001.
+
+#### 4. Describe the approach taken for finding a solution and getting the validation set accuracy to be at least 0.93. Include in the discussion the results on the training, validation and test sets and where in the code these were calculated. Your approach may have been an iterative process, in which case, outline the steps you took to get to the final solution and why you chose those steps. Perhaps your solution involved an already well known implementation or architecture. In this case, discuss why you think the architecture is suitable for the current problem.
 
 My final model results were:
 * training set accuracy of ?
@@ -110,9 +118,9 @@ Here are five German traffic signs that I found on the web:
 
 ![alt text][image2]
 
-The first image might be difficult to classify because ...
+I found these images by googling "German traffic signs", and seleted the ones that can be found in the data set.
 
-####2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set (OPTIONAL: Discuss the results in more detail as described in the "Stand Out Suggestions" part of the rubric).
+#### 2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set (OPTIONAL: Discuss the results in more detail as described in the "Stand Out Suggestions" part of the rubric).
 
 Here are the results of the prediction:
 
