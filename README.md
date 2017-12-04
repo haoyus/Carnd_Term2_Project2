@@ -1,9 +1,9 @@
-#**Traffic Sign Recognition Project Write-up** 
+# **Traffic Sign Recognition Project Write-up** 
 
 
 ---
 
-**Build a Traffic Sign Recognition Project**
+**Build a Traffic Sign Recognition Project (from the project requirements)**
 
 The goals / steps of this project are the following:
 * Load the data set (see below for links to the project data set)
@@ -20,12 +20,13 @@ The goals / steps of this project are the following:
 [image2]: ./New_Images.png "Five new images"
 
 
-## Rubric Points
+## Rubric Points (detailed requirements for submission)
 Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/481/view) individually and describe how I addressed each point in my implementation.  
 
 ---
 
-You're reading it! and here is a link to my [project code](https://github.com/haoyus/Carnd_Term2_Project2/blob/master/Traffic_Sign_Classifier.ipynb)
+## **You're reading it! and here is a link to my [project code](https://github.com/haoyus/Carnd_Term2_Project2/blob/master/Traffic_Sign_Classifier.ipynb)**
+And in the following sessions I will walk you through it step by step.
 
 ### Data Set Summary & Exploration
 
@@ -90,13 +91,15 @@ To train the model, I used 20 EPOCHS. Initially I used 10, but later on I figure
 
 The batch size I used is 128, which follows the LeNet original setting. Same for the training rate, I kepted it as 0.001.
 
+For dropout, I used 0.5 as keep_prob for training. But for validation and test, the keep_prob is 1.
+
+
 #### 4. Describe the approach taken for finding a solution and getting the validation set accuracy to be at least 0.93. Include in the discussion the results on the training, validation and test sets and where in the code these were calculated. Your approach may have been an iterative process, in which case, outline the steps you took to get to the final solution and why you chose those steps. Perhaps your solution involved an already well known implementation or architecture. In this case, discuss why you think the architecture is suitable for the current problem.
 
 My final model results were:
-* training set accuracy of ?
-* validation set accuracy of ? 
-* test set accuracy of ?
-
+* training set accuracy of 0.998
+* validation set accuracy of 0.961
+* test set accuracy of 0.943
 If an iterative approach was chosen:
 * What was the first architecture that was tried and why was it chosen?
 * What were some problems with the initial architecture?
@@ -104,53 +107,146 @@ If an iterative approach was chosen:
 * Which parameters were tuned? How were they adjusted and why?
 * What are some of the important design choices and why were they chosen? For example, why might a convolution layer work well with this problem? How might a dropout layer help with creating a successful model?
 
-If a well known architecture was chosen:
-* What architecture was chosen?
-* Why did you believe it would be relevant to the traffic sign application?
-* How does the final model's accuracy on the training, validation and test set provide evidence that the model is working well?
- 
+I improved the solution by an iterative approach.
 
-###Test a Model on New Images
+In the beginning, I started with the LeNet architecture for the following reasons:
+* It was designed for classifying images.
+* It has been fully explored and proven to be accurate.
+* Its convolutional layers can detect images regardless of where they are in the whole picture.
 
-####1. Choose five German traffic signs found on the web and provide them in the report. For each image, discuss what quality or qualities might be difficult to classify.
+However, the original LeNet was to deal with grayscale images with size 32x32x1 and only 10 classes, whereas we have RGB images with size 32x32x3 and 43 classes. So I modified the LeNet so that it can be applied to our case: I changed the input of LeNet from 32x32 to 32x32x3, and changed the final output size from 10 to 43.
+So the first architecture I tried was:
+| Layer         		|     Description	        					| 
+|:---------------------:|:---------------------------------------------:| 
+| Input         		| 32x32x3 RGB image   							| 
+| Layer 1: Convolution 5x5     	| 1x1 stride, valid padding, outputs 28x28x6 	|
+| RELU					|					outputs 28x28x6				|
+| Max pooling	      	| 2x2 stride, valid padding, outputs 14x14x6 	|
+| Layer 2: Convolution 5x5	    | 1x1 stride, valid padding, outputs 10x10x16		|
+| RELU		| outputs 10x10x16			|
+| Max pooling	      	| 2x2 stride, valid padding, outputs 5x5x16 	|
+| Flatten	      	| input 5x5x16, output 5x5x16=400 	|
+| Layer 3: Fully Connected   | input 400, output 120		|
+| RELU					|					outputs 120			|
+| Layer 4: Fully Connected   | input 120, output 84		|
+| RELU					|					outputs 84			|
+| Layer 5: Fully Connected   | input 84, Output size is n_classes=43		|
+
+With this architecture, I was able to achieve:
+* training set accuracy of 0.993
+* validation set accuracy of 0.902
+This was not good. So I didn't test it with test set.
+
+I thought the output sizes of fully connected layers might be a little too small for a final output size of 43, because 43 is much bigger than 10. I'd like to try increasing the output sizes of fully connected layers so that it contains sufficient information to classify 43 types.
+Thus I make the following changes (highlighted with **bold**):
+| Layer         		|     Description	        					| 
+|:---------------------:|:---------------------------------------------:| 
+| Input         		| 32x32x3 RGB image   							| 
+| Layer 1: Convolution 5x5     	| 1x1 stride, valid padding, outputs 28x28x6 	|
+| RELU					|					outputs 28x28x6				|
+| Max pooling	      	| 2x2 stride, valid padding, outputs 14x14x6 	|
+| Layer 2: Convolution 5x5	    | 1x1 stride, valid padding, outputs 10x10x16		|
+| RELU		| outputs 10x10x16			|
+| Max pooling	      	| 2x2 stride, valid padding, outputs 5x5x16 	|
+| Flatten	      	| input 5x5x16, output 5x5x16=400 	|
+| Layer 3: Fully Connected   | input 400, output 300		|
+| RELU					|					outputs 300			|
+| Layer 4: Fully Connected   | input 300, output 172		|
+| RELU					|					outputs 172			|
+| Layer 5: Fully Connected   | input 172, Output size is n_classes=43		|
+
+And with this bigger network I was able to achieve:
+* training set accuracy of 0.996
+* validation set accuracy of 0.932
+The performance was improved! But it was barely over 0.93 on the validation set accuracy. With test set? I didn't try, because I reckoned that it might not look good.
+
+Then a method came to my mind: **Dropout**.
+From the classes, I learned that Dropout is an efficient way to improved the accuracy of DNN, better than pooling. Max pooling was applied here, then why don't I try applying dropout? So I applied dropout between layer 3 and layer 4, and then between layer 4 and layer 5.
+Now the architecture becomes this:
+
+| Layer         		|     Description	        					| 
+|:---------------------:|:---------------------------------------------:| 
+| Input         		| 32x32x3 RGB image   							| 
+| Layer 1: Convolution 5x5     	| 1x1 stride, valid padding, outputs 28x28x6 	|
+| RELU					|					outputs 28x28x6				|
+| Max pooling	      	| 2x2 stride, valid padding, outputs 14x14x6 	|
+| Layer 2: Convolution 5x5	    | 1x1 stride, valid padding, outputs 10x10x16		|
+| RELU		| outputs 10x10x16			|
+| Max pooling	      	| 2x2 stride, valid padding, outputs 5x5x16 	|
+| Flatten	      	| input 5x5x16, output 5x5x16=400 	|
+| Layer 3: Fully Connected   | input 400, output 300		|
+| RELU					|					outputs 300			|
+| Dropout				|		Only applied for training,	outputs 300			|
+| Layer 4: Fully Connected   | input 300, output 172		|
+| RELU					|					outputs 172			|
+| Dropout				|		Only applied for training, outputs 172			|
+| Layer 5: Fully Connected   | input 172, Output size is n_classes=43		|
+
+With this new architecture, I was able to achieve:
+* training set accuracy of 0.998
+* validation set accuracy of 0.961
+The validation set accuracy is much higher than 0.93! Now I can try the test set. The test set accuracy turned out to be 0.943, higher than 0.93.
+
+### Test a Model on New Images
+
+#### 1. Choose five German traffic signs found on the web and provide them in the report.
 
 Here are five German traffic signs that I found on the web:
 
 ![alt text][image2]
 
-I found these images by googling "German traffic signs", and seleted the ones that can be found in the data set.
+I found these images by googling "German traffic signs", and seleted the ones that can be found in the data set. It seems difficult to find really blurred images online.
 
-#### 2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set (OPTIONAL: Discuss the results in more detail as described in the "Stand Out Suggestions" part of the rubric).
+#### 2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set.
 
 Here are the results of the prediction:
 
 | Image			        |     Prediction	        					| 
 |:---------------------:|:---------------------------------------------:| 
-| Stop Sign      		| Stop sign   									| 
-| U-turn     			| U-turn 										|
-| Yield					| Yield											|
-| 100 km/h	      		| Bumpy Road					 				|
-| Slippery Road			| Slippery Road      							|
+| Priority road      		| Priority road   									| 
+| Yield     			| Yield 										|
+| Stop					| Stop											|
+| General caution	      		| General caution					 				|
+| Turn left ahead			| Turn left ahead      							|
 
 
-The model was able to correctly guess 4 of the 5 traffic signs, which gives an accuracy of 80%. This compares favorably to the accuracy on the test set of ...
+The model was able to correctly guess 5 of the 5 traffic signs, which gives an accuracy of 100%. This compares favorably to the accuracy on the test set of 94.3%.
 
-####3. Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction. Provide the top 5 softmax probabilities for each image along with the sign type of each probability. (OPTIONAL: as described in the "Stand Out Suggestions" part of the rubric, visualizations can also be provided such as bar charts)
+#### 3. Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction. Provide the top 5 softmax probabilities for each image along with the sign type of each probability.
 
-The code for making predictions on my final model is located in the 11th cell of the Ipython notebook.
+The code for making predictions on my final model is as follows:
+```python
+with tf.Session() as sess:
+    saver.restore(sess, tf.train.latest_checkpoint('.'))
+    
+    softmaxes = sess.run(tf.nn.softmax(logits), feed_dict={x: X_new, keep_prob: 1.0})
+    
+    values, indices = sess.run(tf.nn.top_k(softmaxes, k=5))
+    
+np.set_printoptions(precision=10)
+print('\n' + str(values))
+print('\n' + str(indices))
+```
+With 6 as the value of print precision for the probabilities, the top 5 softmax probabilities for each image with the sign type were displayed as:
+```python
+[[ 1.  0.  0.  0.  0.]
+ [ 1.  0.  0.  0.  0.]
+ [ 1.  0.  0.  0.  0.]
+ [ 1.  0.  0.  0.  0.]
+ [ 1.  0.  0.  0.  0.]]
 
-For the first image, the model is relatively sure that this is a stop sign (probability of 0.6), and the image does contain a stop sign. The top five soft max probabilities were
+[[12  0  1  2  3]
+ [13  0  1  2  3]
+ [14  0  1  2  3]
+ [18  0  1  2  3]
+ [34  0  1  2  3]]
+```
+This means the model is 100% sure of it's decision. I was surprised and confused. Because I thought there had be some kind of probability that the model wasn't so sure. So I set the print precision to 10, which means I will show accuracy to e-10. But still, the results didn't change. So the probability that the model had when predicting each sign:
 
 | Probability         	|     Prediction	        					| 
 |:---------------------:|:---------------------------------------------:| 
-| .60         			| Stop sign   									| 
-| .20     				| U-turn 										|
-| .05					| Yield											|
-| .04	      			| Bumpy Road					 				|
-| .01				    | Slippery Road      							|
-
-
-For the second image ... 
-
-
-
+| 1.         			| Priority road   									| 
+| 1.     				| Yield 										|
+| 1.					| Stop											|
+| 1.	      			| General caution						 				|
+| 1.				    | Turn left ahead     							|
